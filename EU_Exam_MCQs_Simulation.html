@@ -1,0 +1,236 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EU Exam MCQs</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .question {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+        .options {
+            list-style: none;
+            padding: 0;
+        }
+        .options li {
+            margin: 10px 0;
+        }
+        .result {
+            margin: 20px 0;
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+        .stats {
+            margin-top: 20px;
+        }
+        .timer {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="timer" id="timer">00:00</div>
+        <h1>EU Exam MCQs Simulation</h1>
+        <div id="quiz-section">
+            <div id="question-box">
+                <p class="question" id="question"></p>
+                <ul class="options" id="options"></ul>
+                <button id="confirm">Confirm</button>
+                <button id="next" style="display:none;">Next Question</button>
+            </div>
+            <div id="feedback" class="result"></div>
+        </div>
+        <div id="stats-section" class="stats" style="display: none;">
+            <h2>Exam Statistics</h2>
+            <p id="summary"></p>
+            <ul id="explanations"></ul>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "What is the primary legislative body of the EU?",
+                options: ["European Council", "European Parliament", "Council of the European Union", "European Commission"],
+                correct: 1,
+                explanation: "The European Parliament is the primary legislative body of the EU, representing EU citizens directly."
+            },
+            {
+                question: "Which treaty established the European Union?",
+                options: ["Treaty of Lisbon", "Treaty of Rome", "Maastricht Treaty", "Nice Treaty"],
+                correct: 2,
+                explanation: "The Maastricht Treaty, signed in 1992, formally established the European Union."
+            },
+            {
+                question: "What is the currency used by the majority of EU member states?",
+                options: ["Euro", "Dollar", "Pound", "Franc"],
+                correct: 0,
+                explanation: "The Euro is the currency used by 20 of the 27 EU member states."
+            },
+            {
+                question: "What is the role of the European Commission?",
+                options: ["Legislating EU laws", "Proposing legislation and implementing decisions", "Resolving disputes", "Supervising elections"],
+                correct: 1,
+                explanation: "The European Commission proposes legislation, enforces EU laws, and implements decisions."
+            },
+            {
+                question: "Where is the European Parliament headquartered?",
+                options: ["Brussels", "Strasbourg", "Luxembourg", "Paris"],
+                correct: 1,
+                explanation: "The European Parliament has its official seat in Strasbourg, though it also meets in Brussels."
+            },
+            {
+                question: "What year did the United Kingdom leave the EU?",
+                options: ["2018", "2019", "2020", "2021"],
+                correct: 2,
+                explanation: "The United Kingdom officially left the EU on January 31, 2020."
+            },
+            {
+                question: "Which institution ensures the uniform application of EU law?",
+                options: ["European Parliament", "European Commission", "Court of Justice of the European Union", "European Central Bank"],
+                correct: 2,
+                explanation: "The Court of Justice of the European Union ensures EU law is applied uniformly across member states."
+            },
+            {
+                question: "How many member states are in the EU as of 2023?",
+                options: ["27", "28", "29", "26"],
+                correct: 0,
+                explanation: "As of 2023, the EU consists of 27 member states."
+            },
+            {
+                question: "What is the Schengen Area?",
+                options: ["An economic agreement", "A free travel zone", "A defense pact", "A trade agreement"],
+                correct: 1,
+                explanation: "The Schengen Area allows free movement of people between participating European countries."
+            },
+            {
+                question: "Which body manages the monetary policy of the EU?",
+                options: ["European Commission", "European Central Bank", "Council of the EU", "European Parliament"],
+                correct: 1,
+                explanation: "The European Central Bank is responsible for the monetary policy of the Eurozone."
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let correctAnswers = 0;
+        const incorrectQuestions = [];
+        let startTime;
+
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+        }
+
+        function startTimer() {
+            startTime = Date.now();
+            setInterval(() => {
+                const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+                document.getElementById('timer').textContent = formatTime(elapsedTime);
+            }, 1000);
+        }
+
+        function loadQuestion() {
+            const question = questions[currentQuestionIndex];
+            document.getElementById('question').textContent = question.question;
+            const optionsList = document.getElementById('options');
+            optionsList.innerHTML = '';
+
+            question.options.forEach((option, index) => {
+                const li = document.createElement('li');
+                const input = document.createElement('input');
+                input.type = 'radio';
+                input.name = 'option';
+                input.value = index;
+                input.id = `option${index}`;
+
+                const label = document.createElement('label');
+                label.htmlFor = `option${index}`;
+                label.textContent = option;
+
+                li.appendChild(input);
+                li.appendChild(label);
+                optionsList.appendChild(li);
+            });
+
+            document.getElementById('feedback').style.display = 'none';
+            document.getElementById('confirm').style.display = 'block';
+            document.getElementById('next').style.display = 'none';
+        }
+
+        function showFeedback(isCorrect, explanation) {
+            const feedback = document.getElementById('feedback');
+            feedback.style.display = 'block';
+            feedback.textContent = isCorrect ? 'Correct! ' : 'Incorrect. ';
+            feedback.textContent += explanation;
+        }
+
+        function showStats() {
+            document.getElementById('quiz-section').style.display = 'none';
+            const statsSection = document.getElementById('stats-section');
+            statsSection.style.display = 'block';
+
+            document.getElementById('summary').textContent = `You answered ${correctAnswers} out of ${questions.length} questions correctly.`;
+
+            const explanationsList = document.getElementById('explanations');
+            explanationsList.innerHTML = '';
+            incorrectQuestions.forEach(({ question, explanation }) => {
+                const li = document.createElement('li');
+                li.textContent = `${question} Explanation: ${explanation}`;
+                explanationsList.appendChild(li);
+            });
+        }
+
+        document.getElementById('confirm').addEventListener('click', () => {
+            const selectedOption = document.querySelector('input[name="option"]:checked');
+            if (!selectedOption) {
+                alert('Please select an answer.');
+                return;
+            }
+
+            const selectedValue = parseInt(selectedOption.value);
+            const question = questions[currentQuestionIndex];
+
+            if (selectedValue === question.correct) {
+                correctAnswers++;
+                showFeedback(true, question.explanation);
+            } else {
+                incorrectQuestions.push(question);
+                showFeedback(false, question.explanation);
+            }
+
+            document.getElementById('confirm').style.display = 'none';
+            document.getElementById('next').style.display = 'block';
+        });
+
+        document.getElementById('next').addEventListener('click', () => {
+            currentQuestionIndex++;
+
+            if (currentQuestionIndex < questions.length) {
+                loadQuestion();
+            } else {
+                showStats();
+            }
+        });
+
+        startTimer();
+        loadQuestion();
+    </script>
+</body>
+</html>
